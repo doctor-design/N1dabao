@@ -86,7 +86,6 @@ jobs:
         sudo chmod -R 777 /opt/kernel/tmp
         cd /opt/kernel/tmp
         sudo pigz -9 $RELEASE_NAME
-
         echo "::set-output name=status::success"
 
     - name: Check Files4
