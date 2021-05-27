@@ -46,7 +46,7 @@ fi
 echo "Use $OPWRT_ROOTFS_GZ as openwrt rootfs!"
 
 # 目标镜像文件
-TGT_IMG="${WORK_DIR}/N1-59+o.img"
+TGT_IMG="${WORK_DIR}/openwrt_${SOC}_${BOARD}_${OPENWRT_VER}_k${KERNEL_VERSION}${SUBVER}.img"
 
 # 判断内核版本是否 >= 5.10
 K_VER=$(echo "$KERNEL_VERSION" | cut -d '.' -f1)
@@ -240,6 +240,9 @@ TGT_ROOT=${TEMP_DIR}/tgt_root
 mkdir $TGT_BOOT $TGT_ROOT
 mount -t vfat ${TGT_DEV}p1 $TGT_BOOT
 mount -t btrfs -o compress=zstd ${TGT_DEV}p2 $TGT_ROOT
+
+echo "创建 /etc 子卷 ..."
+btrfs subvolume create $TGT_ROOT/etc
 
 # extract root
 echo "openwrt 根文件系统解包 ... "
@@ -442,6 +445,16 @@ config share
 EOF
 fi
 
+# for openclash
+if [ -d ./etc/openclash/core ];then
+    (
+        mkdir -p ./usr/share/openclash/core && \
+	cd ./etc/openclash && \
+	mv core ../../usr/share/openclash/ && \
+	ln -s ../../usr/share/openclash/core .
+    )
+fi
+
 chmod 755 ./etc/init.d/*
 
 sed -e "s/option wan_mode 'false'/option wan_mode 'true'/" -i ./etc/config/dockerman 2>/dev/null
@@ -481,9 +494,6 @@ config mount
 	option fstype 'vfat'
 EOF
 
-# 2021.04.01添加
-# 强制锁定fstab,防止用户擅自修改挂载点
-chattr +ia ./etc/config/fstab
 echo "/etc/config/fstab --->"
 cat ./etc/config/fstab
 
@@ -516,13 +526,13 @@ if [ $K510 -eq 1 ];then
 fi
 
 # 默认禁用sfe
-sed -e 's/option enabled '1'/option enabled '0'/' -i ./etc/config/sfe
+[ -f ./etc/config/sfe ] && sed -e 's/option enabled '1'/option enabled '0'/' -i ./etc/config/sfe
 
 [ -f ./etc/modules.d/usb-net-asix-ax88179 ] || echo "ax88179_178a" > ./etc/modules.d/usb-net-asix-ax88179
 # +版内核，优先启用v2驱动, +o内核则启用v1驱动
 if echo $KERNEL_VERSION | grep -E '*\+$' ;then
-	echo "r8152_v2" > ./etc/modules.d/usb-net-rtl8152
-	#echo "r8152" > ./etc/modules.d/usb-net-rtl8152
+	#echo "r8152_v2" > ./etc/modules.d/usb-net-rtl8152
+	echo "r8152" > ./etc/modules.d/usb-net-rtl8152
 else
 	echo "r8152" > ./etc/modules.d/usb-net-rtl8152
 fi
@@ -593,6 +603,17 @@ EOF
 [ -f $CPUSTAT_PATCH ] && \
 cd $TGT_ROOT/usr/lib/lua/luci/view/admin_status && \
 patch -p0 < ${CPUSTAT_PATCH}
+
+# 创建 /etc 初始快照
+echo "创建初始快照: /etc -> /.snapshots/etc-000"
+cd $TGT_ROOT && \
+mkdir -p .snapshots && \
+btrfs subvolume snapshot -r etc .snapshots/etc-000
+
+# 2021.04.01添加
+# 强制锁定fstab,防止用户擅自修改挂载点
+# 开启了快照功能之后，不再需要锁定fstab
+#chattr +ia ./etc/config/fstab
 
 # clean temp_dir
 cd $TEMP_DIR
