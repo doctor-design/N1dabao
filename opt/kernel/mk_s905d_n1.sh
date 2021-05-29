@@ -46,7 +46,7 @@ fi
 echo "Use $OPWRT_ROOTFS_GZ as openwrt rootfs!"
 
 # 目标镜像文件
-TGT_IMG="N1-59+o.img"
+TGT_IMG="${WORK_DIR}/N1-59+o.img"
 #TGT_IMG="${WORK_DIR}/openwrt_${SOC}_${BOARD}_${OPENWRT_VER}_k${KERNEL_VERSION}${SUBVER}.img"
 
 # 判断内核版本是否 >= 5.10
