@@ -86,9 +86,10 @@ jobs:
         sudo chmod -R 777 /opt/kernel/tmp
         cd /opt/kernel/tmp
         sudo pigz -9 $RELEASE_NAME
-        count=` find -name '*.xz' | wc -l `
+        count=` find -name '*.gz' | wc -l `
         if [ $count -gt 0 ] ; then
            echo -e "a\tb\tc\nd\te\tf1"
+           echo $count
         else
            echo  -e "a\tb\tc\nd\te\tf2"
         fi
