@@ -26,8 +26,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - flippy_name: 59
-            release_name: N1-59+o.img
+          - flippy_name: 60
+            release_name: N1-60+o.img
 
     env:
       FLIPPY_NAME: ${{ matrix.flippy_name }}   
@@ -44,8 +44,9 @@ jobs:
         echo "DATE=$(date "+%Y-%m-%d %H:%M:%S")"  >> $GITHUB_ENV
         
         sudo chmod  -R 777 /opt
-        #cp -r ${FLIPPY_NAME}/opt/* /opt
-        cp -r opt/* /opt
+        cp -r ${FLIPPY_NAME}/opt/* /opt
+        echo ${FLIPPY_NAME}
+ #       cp -r opt/* /opt
                 
     - name: Download
       run: |
