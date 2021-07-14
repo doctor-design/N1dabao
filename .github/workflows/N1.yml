@@ -1,4 +1,4 @@
-name: Build N1 61+o and 61+
+name: Build N1 62+o and 62+
 on:
   repository_dispatch:
   workflow_dispatch:
@@ -26,10 +26,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - flippy_name: 61+o
-            release_name: N1-mini-61+o.img
-          - flippy_name: 61+
-            release_name: N1-mini-61+.img
+          - flippy_name: 62+o
+            release_name: N1-mini-62+o.img
+          - flippy_name: 62+
+            release_name: N1-mini-62+.img
 
     env:
       FLIPPY_NAME: ${{ matrix.flippy_name }}   
@@ -110,7 +110,7 @@ jobs:
         token: ${{ secrets.RELEASES_TOKEN_DABAO }}
         body: |
           ## 以下为N1和HK1的最新固件（每日上午7时自动编译打包最新固件）
-          默认IP：192.168.1.99 默认密码： password
+          默认IP：192.168.2.5 默认密码： password
           Openwrt🚀(注:此版本为个人的精简版。+o版内核更稳定)
           N1和HK1在线升级方法：
              1. cd /mnt/mmcblk2p4
